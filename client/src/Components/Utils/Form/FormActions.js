@@ -11,17 +11,16 @@ export const validate = (element, formdata= []) => {
   }
 
   if(element.validation.confirm){
-    const valid = element.value.trim() === formdata[element.validation.confirm].value;
-    const message = `${!valid ? 'Passwords do not match':''}`;
-    error = !valid ? [valid,message] : error;
-}
+      const valid = element.value.trim() === formdata[element.validation.confirm].value;
+      const message = `${!valid ? 'Passwords do not match':''}`;
+      error = !valid ? [valid,message] : error;
+  }
 
   if(element.validation.required){
       const valid = element.value.trim() !== '';
       const message = `${!valid ? 'This field is required':''}`;
       error = !valid ? [valid,message] : error;
-    }
-    
+  }
 
   return error
 }
@@ -41,7 +40,7 @@ export const update = (element, formdata, formName ) => {
       newElement.valid = validData[0];
       newElement.validationMessage = validData[1];
   }
-    
+
   newElement.touched = element.blur;
   newFormdata[element.id] = newElement;
 
@@ -51,9 +50,12 @@ export const update = (element, formdata, formName ) => {
 export const generateData = (formdata, formName) =>{
   let dataToSubmit = {};
 
-    for (let key in formdata) {
-      dataToSubmit[key] = formdata[key].value;
+  for(let key in formdata){
+      if(key !== 'confirmPassword'){
+          dataToSubmit[key] = formdata[key].value;
+      }
   }
+
   return dataToSubmit;
 }
 
@@ -62,7 +64,36 @@ export const isFormValid = (formdata, formName) => {
 
   for(let key in formdata){
       formIsValid = formdata[key].valid && formIsValid
-    }
+  }
   return formIsValid;
+}
 
+export const populateOptionFields= (formdata, arrayData =[],field) => {
+  const newArray = [];
+  const newFormdata = {...formdata};
+
+  arrayData.forEach(item=>{
+      newArray.push({key:item._id,value:item.name});
+  });
+
+  newFormdata[field].config.options = newArray;
+  return newFormdata;
+}
+
+export const resetFields = (formdata, formName)=>{
+  const newFormdata = {...formdata};
+
+  for(let key in newFormdata){
+      if(key === 'images'){
+          newFormdata[key].value = [];
+      }else{
+          newFormdata[key].value = '';
+      }
+
+      newFormdata[key].valid = false;
+      newFormdata[key].touched = false;
+      newFormdata[key].validationMessage = '';
+  }
+
+  return newFormdata
 }
