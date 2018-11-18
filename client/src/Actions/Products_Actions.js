@@ -3,13 +3,39 @@ import {
     GET_PRODUCTS_BY_SELL,
     GET_PRODUCTS_BY_ARRIVAL,
     GET_BRANDS,
+    ADD_BRAND,
     GET_WOODS,
+    ADD_WOOD,
     GET_PRODUCTS_TO_SHOP,
     ADD_PRODUCT,
-    CLEAR_PRODUCT
+    CLEAR_PRODUCT,
+    GET_PRODUCT_DETAIL,
+    CLEAR_PRODUCT_DETAIL
 } from './Types';
 
 import { PRODUCT_SERVER } from '../Components/Utils/Misc';
+
+export const getProductDetail=(id)=>{
+
+    const request = axios.get(`${PRODUCT_SERVER}/articles_by_id?id=${id}&type=single`)
+    .then(response=>{
+        return response.data[0]
+    });
+
+    return {
+        type: GET_PRODUCT_DETAIL,
+        payload: request
+    }
+
+}
+
+
+export const clearProductDetail=()=>{
+    return {
+        type: CLEAR_PRODUCT_DETAIL,
+        payload:''
+    }
+}
 
 
 export const getProductsBySell=async()=>{
@@ -92,6 +118,70 @@ export const getBrands=async()=>{
         payload: request.data
     }
 
+}
+
+// export const addBrand = (dataToSubmit, existingBrands) => {
+//     const request = axios.post(`${PRODUCT_SERVER}/brand`,dataToSubmit)
+//     .then(response=>{
+//         let brands = [
+//             ...existingBrands,
+//             response.data.brand
+//         ];
+//         return {
+//             success: response.data.success,
+//             brands
+//         }
+//     });
+
+//     return {
+//         type: ADD_BRAND,
+//         payload: request
+//     }
+// }
+
+export const addBrand = async (dataToSubmit, existingBrands) => {
+    let data = {
+        success: false,
+        brands:[]
+    }
+    try {
+        const request = await axios.post(`${PRODUCT_SERVER}/brand`,dataToSubmit)
+        let brands = [
+            ...existingBrands,
+            request.data.brand
+        ];
+        data = {
+            success:request.data.success,
+            brands
+        }
+    } catch (error) {
+        return {
+            success: false
+        }
+    }
+    return {
+        type: ADD_BRAND,
+        payload: data
+    }
+}
+
+
+export const addWood=async(dataToSubmit, existingWoods)=>{
+    const request = axios.post(`${PRODUCT_SERVER}/wood`,dataToSubmit)
+    .then(response=>{
+        let woods = [
+            ...existingWoods,
+            response.data.wood
+        ];
+        return {
+            success: response.data.success,
+            woods
+        }
+    });
+    return {
+        type: ADD_WOOD,
+        payload: request
+    }
 }
 
 export const getWoods=async()=>{

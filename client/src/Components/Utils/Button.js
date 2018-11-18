@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import faShoppingBag from '@fortawesome/fontawesome-free-solid/faShoppingBag';
- 
+
+
 const MyButton = (props) => {
 
     const buttons = () => {
@@ -19,7 +20,7 @@ const MyButton = (props) => {
                     {props.title}
                 </Link>
             break;
-                case "bag_link":
+            case "bag_link":
                 template = 
                     <div className="bag_link"
                         onClick={()=>{
@@ -29,6 +30,19 @@ const MyButton = (props) => {
                         <FontAwesomeIcon
                             icon={faShoppingBag}
                         />
+                    </div>
+            break;
+            case "add_to_cart_link":
+                template =   
+                    <div className="add_to_cart_link"
+                        onClick={()=>{
+                            props.runAction();
+                        }}
+                    >
+                        <FontAwesomeIcon
+                            icon={faShoppingBag}
+                        />
+                        Add to cart
                     </div>
             break;
             default:
