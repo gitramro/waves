@@ -6,6 +6,7 @@ const cloudinary = require('cloudinary');
 
 const app = express();
 const mongoose = require('mongoose');
+const async = require('async');
 require('dotenv').config();
 
 mongoose.Promise = global.Promise;
@@ -26,6 +27,8 @@ const { User } = require('./Models/User');
 const { Brand } = require('./Models/Brand');
 const { Wood } = require('./Models/Wood');
 const { Product } = require('./Models/Product');
+const { Payment } = require('./Models/Payment');
+const { Site } = require('./models/site');
 
 // Middlewares
 const { auth } = require('./Middleware/Auth');
@@ -351,6 +354,123 @@ app.get('/api/users/removeFromCart',auth,(req,res)=>{
       }
   );
 })
+
+app.post('/api/users/successBuy',auth,(req,res)=>{
+  let history = [];
+  let transactionData = {}
+
+  // user history
+  req.body.cartDetail.forEach((item)=>{
+      history.push({
+          dateOfPurchase: Date.now(),
+          name: item.name,
+          brand: item.brand.name,
+          id: item._id,
+          price: item.price,
+          quantity: item.quantity,
+          paymentId: req.body.paymentData.paymentID
+      })
+  })
+
+  // PAYMENTS DASH
+  transactionData.user = {
+      id: req.user._id,
+      name: req.user.name,
+      lastname: req.user.lastname,
+      email: req.user.email
+  }
+  transactionData.data = req.body.paymentData;
+  transactionData.product = history;
+      
+  User.findOneAndUpdate(
+      { _id: req.user._id },
+      { $push:{ history:history }, $set:{ cart:[] } },
+      { new: true },
+      (err,user)=>{
+          if(err) return res.json({success:false,err});
+
+          const payment = new Payment(transactionData);
+          payment.save((err,doc)=>{
+              if(err) return res.json({success:false,err});
+              let products = [];
+              doc.product.forEach(item=>{
+                  products.push({id:item.id,quantity:item.quantity})
+               })
+            
+              async.eachSeries(products,(item,callback)=>{ 
+                  Product.update(
+                      {_id: item.id},
+                      { $inc:{
+                          "sold": item.quantity
+                      }},
+                      {new:false},
+                      callback
+                )
+                //do this after it finishes
+              },(err)=>{
+                  if(err) return res.json({success:false,err})
+                  res.status(200).json({
+                      success:true,
+                      cart: user.cart,
+                      cartDetail:[]
+                  })
+              })
+          });
+      }
+  )
+})
+
+app.post('/api/users/update_profile',auth,(req,res)=>{
+
+  User.findOneAndUpdate(
+      { _id: req.user._id },
+      {
+          "$set": req.body
+      },
+      { new: true },
+      (err,doc)=>{
+          if(err) return res.json({success:false,err});
+          return res.status(200).send({
+              success:true
+          })
+      }
+  );
+})
+
+//=================================
+//              SITE
+//=================================
+
+app.get('/api/site/site_data',(req,res)=>{
+  Site.find({}, (err, site) => {
+      if(err) return res.status(400).send(err);
+      res.status(200).send(site[0].siteInfo)
+  });
+});
+
+app.post('/api/site/site_data', auth, admin, (req, res) => {
+  Site.findOneAndUpdate(
+      { name: 'Site'},
+      { "$set": { siteInfo: req.body }},
+      { new: true },
+    (err, doc) => {
+          if(err) return res.json({success:false,err});
+          return res.status(200).send({
+              success: true,
+              siteInfo: doc.siteInfo
+          })
+      }
+  )
+})
+
+// DEFAULT 
+if( process.env.NODE_ENV === 'production' ){
+  const path = require('path');
+  app.get('/*',(req,res)=>{
+      res.sendfile(path.resolve(__dirname,'../client','build','index.html'))
+  })
+}
+
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

@@ -5,8 +5,11 @@ import {
     AUTH_USER,
     LOGOUT_USER,
     ADD_TO_CART_USER,
+    GET_CART_ITEMS_USER,
     REMOVE_CART_ITEM_USER,
-    GET_CART_ITEMS_USER
+    ON_SUCCESS_BUY_USER,
+    UPDATE_DATA_USER,
+    CLEAR_UPDATE_USER_DATA
 } from './Types';
 
 import { USER_SERVER, PRODUCT_SERVER } from '../Components/Utils/Misc';
@@ -58,7 +61,6 @@ export function logoutUser(){
 
 }
 
-
 export function addToCart(_id){
 
     const request = axios.post( `${USER_SERVER}/addToCart?productId=${_id}`)
@@ -69,7 +71,6 @@ export function addToCart(_id){
         payload: request
     }
 }
-
 
 export function getCartItems(cartItems, userCart){
 
@@ -94,10 +95,12 @@ export function getCartItems(cartItems, userCart){
 
 }
 
+
 export function removeCartItem(id){
 
     const request = axios.get(`${USER_SERVER}/removeFromCart?_id=${id}`)
                     .then(response => {
+
                         response.data.cart.forEach(item=>{
                             response.data.cartDetail.forEach((k,i)=>{
                                 if(item.id === k._id){
@@ -108,11 +111,40 @@ export function removeCartItem(id){
                             return response.data;
                     })
 
-
-                        
     return {
         type: REMOVE_CART_ITEM_USER,
         payload: request
     }
 
+}
+
+
+
+export function onSuccessBuy(data){ 
+    const request = axios.post(`${USER_SERVER}/successBuy`,data)
+                    .then(response => response.data);
+
+    return {
+        type: ON_SUCCESS_BUY_USER,
+        payload: request
+    }
+}
+
+export function updateUserData(dataToSubmit){
+    const request = axios.post(`${USER_SERVER}/update_profile`,dataToSubmit)
+                    .then(response => {
+                        return response.data
+                    });
+    
+    return {
+        type: UPDATE_DATA_USER,
+        payload: request
+    }
+}
+
+export function clearUpdateUser(){
+    return {
+        type: CLEAR_UPDATE_USER_DATA,
+        payload: ''
+    }
 }
