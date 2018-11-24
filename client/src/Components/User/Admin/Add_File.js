@@ -46,11 +46,11 @@ class AddFile extends Component {
 
     showFileList = () => (
         this.state.files ?
-        this.state.files.map((item, i) => (
+            this.state.files.map((item,i)=>(
                 <li key={i}>
-                    <Link to={`/api/users/download/${item}`} target="_blank">
-                        {item}
-                    </Link>
+                    <a href={`/api/users/download/${item}`} download>
+                    {item}
+                    </a>   
                 </li>
             ))
         :null
@@ -60,6 +60,7 @@ class AddFile extends Component {
     componentDidMount(){
         axios.get('/api/users/admin_files')
         .then(response=>{
+            console.log(response.data)
             this.setState({ files:response.data })
         })
     }

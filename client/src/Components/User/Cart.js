@@ -9,7 +9,7 @@ import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import faFrown from '@fortawesome/fontawesome-free-solid/faFrown'
 import faSmile from '@fortawesome/fontawesome-free-solid/faSmile'
 
-//AVM27b28D-RRBAZSxQ-6zMpejC3-O5NVFfxxBqk9vYebNDEuSE5Br9Z_SPbX8n1BENYN994rq3m13QiW
+/// AfbA2-qjz92KhC5IDxvx2UpiIDBmSD7PdlKkZk1-OndNwg7Wc5wVAJKlPWQJcHwioMFz0kn4zOXnbqGW
 
 import Paypal from '../Utils/PayPal';
 
@@ -57,8 +57,8 @@ class UserCart extends Component {
 
     removeFromCart = (id) => {
         this.props.dispatch(removeCartItem(id))
-        .then(()=>{
-            if (this.props.user.cartDetail && this.props.user.cartDetail.length <= 0) {
+            .then(() => {
+            if(this.props.user.cartDetail.length <= 0){
                 this.setState({
                     showTotal: false
                 })

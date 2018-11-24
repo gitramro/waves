@@ -9,7 +9,9 @@ import { SITE_SERVER } from '../Components/Utils/Misc';
 export function getSiteData(){
 
     const request = axios.get(`${SITE_SERVER}/site_data`)
-                    .then(response => response.data);
+        .then((response) => {
+                        console.log(response)
+                    });
 
     return {
         type: GET_SITE_DATA,

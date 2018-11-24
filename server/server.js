@@ -5,6 +5,7 @@ const formidable = require('express-formidable');
 const cloudinary = require('cloudinary');
 const SHA1 = require("crypto-js/sha1"); 
 const multer = require('multer');
+const moment = require('moment');
 const fs = require('fs');
 const path = require('path');
 
@@ -51,7 +52,7 @@ const { Brand } = require('./Models/Brand');
 const { Wood } = require('./Models/Wood');
 const { Product } = require('./Models/Product');
 const { Payment } = require('./Models/Payment');
-const { Site } = require('./models/site');
+const { Site } = require('./Models/Site');
 
 // Middlewares
 const { auth } = require('./Middleware/Auth');
@@ -249,6 +250,45 @@ app.get('/api/product/woods', async (req, res) => {
 //=================================
 //              USERS
 //=================================
+
+app.post('/api/users/reset_user',(req,res)=>{
+  User.findOne(
+      {'email':req.body.email},
+      (err,user)=>{
+          user.generateResetToken((err,user)=>{
+              if(err) return res.json({success:false,err});
+              sendEmail(user.email,user.name,null,"reset_password",user)
+              return res.json({success:true})
+          })
+      }
+  )
+})
+
+
+app.post('/api/users/reset_password',(req,res)=>{
+
+  var today = moment().startOf('day').valueOf();
+
+  User.findOne({
+      resetToken: req.body.resetToken,
+      resetTokenExp:{
+          $gte: today
+      }
+  },(err,user)=>{
+      if(!user) return res.json({success:false,message:'Sorry, token bad, generate a new one.'})
+  
+      user.password = req.body.password;
+      user.resetToken = '';
+      user.resetTokenExp= '';
+
+      user.save((err,doc)=>{
+          if(err) return res.json({success:false,err});
+          return res.status(200).json({
+              success: true
+          })
+      })
+  })
+})
 
 app.get('/api/users/auth', auth, (req, res) => {
   res.status(200).json({

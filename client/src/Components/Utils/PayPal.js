@@ -43,7 +43,7 @@ class Paypal extends Component {
 
         const client = {
             sandbox:'AVM27b28D-RRBAZSxQ-6zMpejC3-O5NVFfxxBqk9vYebNDEuSE5Br9Z_SPbX8n1BENYN994rq3m13QiW',
-            production:''
+            production:null
         }
         
        
